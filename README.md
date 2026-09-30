@@ -1,24 +1,42 @@
-# Local PDF Tutor
+# PDF Tutor
 
-A completely local multi-PDF tutor using React/TypeScript, FastAPI, PyMuPDF, Sentence Transformers and FAISS.
+A multi-PDF tutor: upload PDFs, ask questions, get answers grounded in the
+document. React/TypeScript frontend, FastAPI backend, PyMuPDF text extraction,
+Neon Postgres storage, and answer generation via a chat-LLM gateway.
 
-No OpenAI, LLM, MongoDB or cloud service.
+Deployable to Vercel as a single project (frontend + API same-origin). See
+[DEPLOY.md](DEPLOY.md).
 
-## Backend
+## How it works
+
+- **Ingestion**: PyMuPDF extracts text and parses Question/Answer pairs (falling
+  back to per-page chunks). Chunks + metadata are stored in Postgres as JSONB.
+- **Retrieval**: exact question match → "Question N" lookup → lexical overlap →
+  top-N fallback. No embeddings.
+- **Answering**: the retrieved context is sent to the chat gateway
+  (`CHAT_API_URL`), which generates a grounded answer. If the gateway is
+  unreachable, the stored answer text is returned as a fallback.
+- Speech-to-text and text-to-speech run in the browser.
+
+## Local development
+
+Backend (needs a Postgres `DATABASE_URL`, e.g. Neon):
+```
 cd backend
 python -m venv .venv
-.venv\\Scripts\\activate
-python -m pip install --upgrade pip
-pip install -r requirements.txt
-uvicorn app.main:app --reload
+.venv/bin/pip install -r requirements.txt
+DATABASE_URL=postgres://... .venv/bin/uvicorn app.main:app --reload
+```
 
-## Frontend
+Frontend:
+```
 cd frontend
 npm install
 npm run dev
-
+```
 Open http://localhost:5173
 
-Each PDF is stored separately under backend/data/documents/<document-id>/ with original.pdf, metadata.json, chunks.json, index.faiss and 300-DPI page images.
+## Configuration
 
-Speech-to-text is intentionally left for a later phase.
+Copy `backend/.env.example` to `backend/.env` and fill in `DATABASE_URL`. See
+[DEPLOY.md](DEPLOY.md) for all variables and Vercel setup.

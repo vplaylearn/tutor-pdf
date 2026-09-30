@@ -3,7 +3,8 @@ import type { FormEvent } from 'react';
 import './styles.css';
 import TextToSpeech from './TextToSpeech';
 
-const API = 'http://localhost:8000';
+// Empty string => same-origin (/api/... on Vercel). Override for local dev via VITE_API_URL.
+const API = import.meta.env.VITE_API_URL ?? '';
 
 type Doc = {
   document_id: string;
@@ -13,11 +14,6 @@ type Doc = {
   records: number;
   extraction_mode: string;
   status: string;
-};
-
-type Image = {
-  page: number;
-  url: string;
 };
 
 type Block = {
@@ -35,7 +31,6 @@ type Source = {
   page?: number | null;
   page_start?: number | null;
   page_end?: number | null;
-  page_images: Image[];
   score: number;
   match_type: string;
 };
@@ -487,27 +482,6 @@ export default function App() {
                   )
                 )}
 
-
-                <div className="pages">
-
-                  {s.page_images.map(im => (
-
-                    <figure key={im.page}>
-
-                      <img
-                        src={API + im.url}
-                        alt={`PDF page ${im.page}`}
-                      />
-
-                      <figcaption>
-                        PDF page {im.page}
-                      </figcaption>
-
-                    </figure>
-
-                  ))}
-
-                </div>
 
               </article>
 

@@ -1,0 +1,19 @@
+[project]
+name = "local-pdf-tutor-backend"
+version = "1.0.0"
+requires-python = ">=3.12"
+
+[tool.vercel]
+# FastAPI instance `app` lives in app/main.py (a recognized entrypoint).
+entrypoint = "app/main.py"
+
+[tool.vercel.scripts]
+# Runs after Python deps install, before deploy. Builds the frontend into
+# backend/public (outDir set in frontend/vite.config.ts) so the function
+# serves it same-origin.
+build = "cd ../frontend && npm ci && npm run build"
+
+[tool.vercel.fastapi]
+# Keep the bundle lean: drop tests and the venv from the function.
+[tool.vercel.fastapi.static]
+exclude = false

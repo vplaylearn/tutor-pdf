@@ -5,3 +5,5 @@ data/uploads/
 data/documents/*
 !data/documents/.gitkeep
 
+.env
+public/

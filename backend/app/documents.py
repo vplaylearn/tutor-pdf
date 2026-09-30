@@ -1,20 +1,49 @@
-import json, shutil
-from pathlib import Path
-BASE_DIR=Path(__file__).resolve().parents[1]
-DOCUMENTS_DIR=BASE_DIR/'data'/'documents'
+"""Document storage backed by Postgres (see app/db.py)."""
+from psycopg.types.json import Jsonb
+from app.db import get_conn
+
+
 def list_documents():
-    DOCUMENTS_DIR.mkdir(parents=True,exist_ok=True); out=[]
-    for d in sorted(DOCUMENTS_DIR.iterdir()):
-        p=d/'metadata.json'
-        if d.is_dir() and p.exists():
-            try: out.append(json.loads(p.read_text(encoding='utf-8')))
-            except Exception: pass
-    return out
+    with get_conn() as conn:
+        rows = conn.execute(
+            'SELECT metadata FROM documents ORDER BY created_at'
+        ).fetchall()
+    return [r[0] for r in rows]
+
+
 def get_document(i):
-    p=DOCUMENTS_DIR/i/'metadata.json'
-    return json.loads(p.read_text(encoding='utf-8')) if p.exists() else None
-def get_document_dir(i): return DOCUMENTS_DIR/i
+    with get_conn() as conn:
+        row = conn.execute(
+            'SELECT metadata FROM documents WHERE document_id = %s', (i,)
+        ).fetchone()
+    return row[0] if row else None
+
+
+def get_chunks(i):
+    with get_conn() as conn:
+        row = conn.execute(
+            'SELECT chunks FROM documents WHERE document_id = %s', (i,)
+        ).fetchone()
+    return row[0] if row else []
+
+
+def save_document(document_id, metadata, chunks):
+    with get_conn() as conn:
+        conn.execute(
+            'INSERT INTO documents (document_id, metadata, chunks) VALUES (%s, %s, %s)',
+            (document_id, Jsonb(metadata), Jsonb(chunks)),
+        )
+
+
+def document_id_exists(i):
+    with get_conn() as conn:
+        row = conn.execute(
+            'SELECT 1 FROM documents WHERE document_id = %s', (i,)
+        ).fetchone()
+    return row is not None
+
+
 def delete_document(i):
-    d=get_document_dir(i)
-    if not d.exists(): return False
-    shutil.rmtree(d); return True
+    with get_conn() as conn:
+        cur = conn.execute('DELETE FROM documents WHERE document_id = %s', (i,))
+    return cur.rowcount > 0
