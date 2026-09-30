@@ -2,6 +2,14 @@
 name = "local-pdf-tutor-backend"
 version = "1.0.0"
 requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115,<1",
+    "uvicorn[standard]>=0.34,<1",
+    "pymupdf>=1.25,<2",
+    "python-multipart>=0.0.20",
+    "pydantic>=2.10,<3",
+    "psycopg[binary]>=3.2,<4",
+]
 
 [tool.vercel]
 # FastAPI instance `app` in app/main.py, given as module:object.
