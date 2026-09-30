@@ -4,8 +4,8 @@ version = "1.0.0"
 requires-python = ">=3.12"
 
 [tool.vercel]
-# FastAPI instance `app` lives in app/main.py (a recognized entrypoint).
-entrypoint = "app/main.py"
+# FastAPI instance `app` in app/main.py, given as module:object.
+entrypoint = "app.main:app"
 
 [tool.vercel.scripts]
 # Runs after Python deps install, before deploy. Builds the frontend into
