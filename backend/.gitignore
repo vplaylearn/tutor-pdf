@@ -6,4 +6,3 @@ data/documents/*
 !data/documents/.gitkeep
 
 .env
-public/

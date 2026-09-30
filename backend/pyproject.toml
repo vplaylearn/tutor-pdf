@@ -15,13 +15,8 @@ dependencies = [
 # FastAPI instance `app` in app/main.py, given as module:object.
 entrypoint = "app.main:app"
 
-[tool.vercel.scripts]
-# Runs after Python deps install, before deploy. Builds the frontend into
-# backend/public (outDir set in frontend/vite.config.ts) so the function
-# serves it same-origin.
-build = "cd ../frontend && npm ci && npm run build"
-
-[tool.vercel.fastapi]
-# Keep the bundle lean: drop tests and the venv from the function.
+# The frontend is pre-built and committed to backend/public (built via
+# `npm run build` in frontend/), so no Node build runs in Vercel's Python
+# builder. app/main.py mounts backend/public at / to serve it same-origin.
 [tool.vercel.fastapi.static]
 exclude = false
